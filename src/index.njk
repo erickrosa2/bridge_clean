@@ -1,0 +1,145 @@
+---
+layout: base.njk
+title: bridge - creative mentorship
+---
+
+<div class="admin-link">
+  <a href="/admin/">admin</a>
+</div>
+
+<h1>bridge</h1>
+<p>get help from experienced creatives. give help when you can. anyone can become a mentor - just add yourself.</p>
+<p><a href="/admin/">+ post request / add mentor</a></p>
+
+<div class="metrics">
+  {% for metric in collections.liveMetrics %}{{ metric.mentorCount }} mentors available - {{ metric.bridgeCount }} bridges crossed{% endfor %}
+</div>
+
+<h2>open requests</h2>
+
+{% for request in collections.openRequests %}
+<div class="request">
+  <div class="row">
+    <span class="tag">please:</span> {{ request.data.need }}
+  </div>
+  
+  <div class="row">
+    <span class="tag">role:</span> {{ request.data.role }}
+  </div>
+  
+  <div class="row">
+    <span class="tag">who:</span> {{ request.data.name | maskName }} [name revealed after connection]
+  </div>
+  
+  <div class="row">
+    <span class="tag">location:</span> {{ request.data.location }}
+  </div>
+  
+  {% if request.data.looking_for %}
+  <div class="row">
+    <span class="tag">looking for:</span> {{ request.data.looking_for }}
+  </div>
+  {% endif %}
+  
+  <div class="row">
+    <span class="tag">expires:</span> {{ request.data.expires | timeLeft }}
+  </div>
+  
+  {% if request.templateContent %}
+  <div class="row">
+    {{ request.templateContent | safe }}
+  </div>
+  {% endif %}
+  
+  <button class="volunteer-btn" onclick="showVolunteerForm('{{ request.data.slug }}')">
+    volunteer to help
+  </button>
+  
+  <div id="form-{{ request.data.slug }}" class="volunteer-form hidden">
+    <form onsubmit="submitVolunteer(event, '{{ request.data.slug }}', '{{ request.data.email }}')">
+      <div>
+        <label>your username:</label>
+        <input type="text" name="mentor_username" required>
+      </div>
+      <div>
+        <label>quick note (optional):</label>
+        <textarea name="message"></textarea>
+      </div>
+      <button type="submit">connect instantly</button>
+      <button type="button" onclick="hideVolunteerForm('{{ request.data.slug }}')">cancel</button>
+    </form>
+    
+    <div class="privacy-notice">
+      private temporary emails created for 7 days. your real email stays hidden. after 7 days, connection expires automatically. this is just to connect and ensure 100% privacy of personal email. for files, use external sharing services [eg.: google drive, dropbox, we transfer].
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% if collections.openRequests.length === 0 %}
+<div class="request">
+  no open requests right now. post the first one!
+</div>
+{% endif %}
+
+<footer>
+  creatives helping creatives. post requests for help. volunteer when you can. private 7-day email bridges for focused help.<br>
+  built on netlify + eleventy
+</footer>
+
+<script>
+function showVolunteerForm(slug) {
+  document.getElementById('form-' + slug).classList.remove('hidden');
+}
+
+function hideVolunteerForm(slug) {
+  document.getElementById('form-' + slug).classList.add('hidden');
+}
+
+async function submitVolunteer(event, slug, menteeEmail) {
+  event.preventDefault();
+  const form = event.target;
+  const formData = new FormData(form);
+  
+  const data = {
+    request_slug: slug,
+    mentor_username: formData.get('mentor_username'),
+    message: formData.get('message'),
+    mentee_email: menteeEmail
+  };
+  
+  if (!data.mentor_username) {
+    alert('please enter your username');
+    return;
+  }
+  
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'connecting...';
+  submitBtn.disabled = true;
+  
+  try {
+    const response = await fetch('/.netlify/functions/volunteer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await response.json();
+    
+    if (response.ok) {
+      alert('bridge connected! both parties have secure contact info.');
+      hideVolunteerForm(slug);
+      form.reset();
+      location.reload();
+    } else {
+      alert('error: ' + result.error);
+    }
+  } catch (error) {
+    alert('network error. please try again.');
+  }
+  
+  submitBtn.textContent = originalText;
+  submitBtn.disabled = false;
+}
+</script>

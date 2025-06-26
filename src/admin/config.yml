@@ -1,0 +1,38 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "src/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "requests"
+    label: "Help Requests"
+    folder: "src/requests"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Slug", name: "slug", widget: "string" }
+      - { label: "Name", name: "name", widget: "string", hint: "First name or nickname (will be masked on public site)" }
+      - { label: "Email", name: "email", widget: "string", pattern: ['^[^@\s]+@[^@\s]+\.[^@\s]+$', 'Your real email (kept private)'] }
+      - { label: "Role", name: "role", widget: "string", hint: "e.g. designer, copywriter, creative" }
+      - { label: "Please help with", name: "need", widget: "string", hint: "Brief description of help needed" }
+      - { label: "Location", name: "location", widget: "string", hint: "e.g. japan (jst), usa west coast (pst)" }
+      - { label: "Looking for", name: "looking_for", widget: "string", hint: "e.g. senior designer, experienced freelancer", required: false }
+      - { label: "Expires", name: "expires", widget: "datetime", default: "" }
+      - { label: "Status", name: "status", widget: "select", options: ["open","matched","expired"], default: "open" }
+      - { label: "Details", name: "body", widget: "markdown", required: false, hint: "Optional: More context about your request" }
+
+  - name: "mentors"
+    label: "Mentors"
+    folder: "src/mentors"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Username", name: "username", widget: "string", hint: "Handle for volunteering (e.g. maya-tokyo, alex-designer)" }
+      - { label: "Name", name: "name", widget: "string", hint: "First name or what you want to be called" }
+      - { label: "Email", name: "email", widget: "string", pattern: ['^[^@\s]+@[^@\s]+\.[^@\s]+$', 'Your real email (kept private)'] }
+      - { label: "Expertise", name: "expertise", widget: "string", hint: "e.g. portfolio reviews, career advice, design feedback" }
+      - { label: "Location", name: "location", widget: "string", hint: "e.g. japan (jst), usa west coast (pst)" }
+      - { label: "Status", name: "status", widget: "select", options: ["live","pause"], default: "live" }
+      - { label: "Bio", name: "body", widget: "markdown", hint: "Brief bio - what you can help with (keep it simple)", required: false }

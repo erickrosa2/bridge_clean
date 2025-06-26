@@ -1,0 +1,108 @@
+body { 
+  font: 16px/1.5 courier, monospace; 
+  background: white; 
+  color: black; 
+  margin: 0; 
+  padding: 20px; 
+}
+
+a { color: blue; text-decoration: underline; }
+
+.row { margin: .6em 0; }
+
+.tag { 
+  font-weight: bold; 
+  margin-right: .6em; 
+}
+
+.metrics { 
+  border: 1px solid black; 
+  padding: 16px; 
+  margin: 20px 0; 
+  font-size: 14px; 
+}
+
+.request { 
+  border: 1px solid black; 
+  margin: 16px 0; 
+  padding: 20px; 
+}
+
+.volunteer-form { 
+  margin-top: 16px; 
+  padding: 16px; 
+  border: 1px solid black; 
+}
+
+.volunteer-btn { 
+  background: white; 
+  border: 2px solid black; 
+  padding: 12px 20px; 
+  cursor: pointer; 
+  font-size: 16px; 
+  font-weight: bold; 
+}
+
+.volunteer-btn:hover { 
+  background: black; 
+  color: white; 
+}
+
+.hidden { display: none; }
+
+.admin-link { 
+  float: right; 
+  font-size: 13px; 
+}
+
+.connected { border: 3px solid black; }
+
+input, textarea, select { 
+  padding: 10px; 
+  border: 1px solid black; 
+  font-family: courier, monospace; 
+  font-size: 14px; 
+  width: 100%; 
+  max-width: 300px; 
+}
+
+button { 
+  margin: 8px 8px 8px 0; 
+  font-family: courier, monospace; 
+  font-size: 14px; 
+  padding: 10px 16px; 
+  background: white;
+  border: 1px solid black;
+  cursor: pointer;
+}
+
+button:hover {
+  background: black;
+  color: white;
+}
+
+.privacy-notice { 
+  font-size: 12px; 
+  color: #666; 
+  margin-top: 16px; 
+  padding: 12px; 
+  border: 1px solid #ccc; 
+}
+
+textarea { 
+  height: 60px; 
+  resize: vertical; 
+}
+
+label { 
+  display: block; 
+  margin-bottom: 4px; 
+  font-weight: bold; 
+}
+
+footer {
+  margin-top: 40px; 
+  padding-top: 20px; 
+  border-top: 1px solid black; 
+  font-size: 11px;
+}
