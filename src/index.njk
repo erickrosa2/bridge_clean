@@ -9,7 +9,10 @@ title: bridge - creative mentorship
 
 <h1>bridge</h1>
 <p>get help from experienced creatives. give help when you can. anyone can become a mentor - just add yourself.</p>
-<p><a href="/admin/">+ post request / add mentor</a></p>
+<p>
+  <a href="/admin/#/collections/requests/new" style="margin-right: 20px; text-decoration: underline;">📝 Post Help Request</a>
+  <a href="/admin/#/collections/mentors/new" style="text-decoration: underline;">🙋‍♂️ Become a Mentor</a>
+</p>
 
 <div class="metrics">
   {% for metric in collections.liveMetrics %}{{ metric.mentorCount }} mentors available - {{ metric.bridgeCount }} bridges crossed{% endfor %}
