@@ -68,7 +68,9 @@ title: bridge - creative mentorship
   <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; max-width:400px; width:90%;">
     <h3>Volunteer to Help</h3>
     <div id="connectionStatus" style="display:none; padding:10px; margin-bottom:15px; border-radius:4px;"></div>
-    <form id="volunteerForm" netlify name="volunteer-connection">
+    
+    <!-- Formspree Form -->
+    <form id="volunteerForm" action="https://formspree.io/f/xblyqlay" method="POST">
       <div style="margin-bottom:15px;">
         <label>Your name:</label><br>
         <input type="text" name="volunteer_name" required style="width:100%; padding:8px; margin-top:5px;">
@@ -93,12 +95,18 @@ title: bridge - creative mentorship
       <input type="hidden" name="mentee_name" value="">
       <input type="hidden" name="mentee_email" value="">
       
+      <!-- Email subject for better organization -->
+      <input type="hidden" name="_subject" value="New volunteer connection from Bridge">
+      
+      <!-- Send copy to the mentee as well -->
+      <input type="hidden" name="_cc" value="">
+      
       <button type="submit" style="background:#333; color:white; padding:10px 20px; border:none; border-radius:4px; margin-right:10px;">Send Connection</button>
       <button type="button" onclick="closeVolunteerForm()" style="background:#ccc; color:#333; padding:10px 20px; border:none; border-radius:4px;">Cancel</button>
     </form>
     
     <div class="privacy-notice" style="margin-top:20px; font-size:12px; color:#666;">
-      connection sent via email. both parties get each other's contact info to connect directly. no temporary emails needed - just direct professional networking.
+      connection sent via email. both parties get each other's contact info to connect directly.
     </div>
   </div>
 </div>
@@ -123,6 +131,7 @@ function openVolunteerForm(buttonElement, menteeName, menteeEmail) {
   form.querySelector('input[name="request_location"]').value = location;
   form.querySelector('input[name="mentee_name"]').value = menteeName;
   form.querySelector('input[name="mentee_email"]').value = menteeEmail;
+  form.querySelector('input[name="_cc"]').value = menteeEmail; // CC the mentee
   
   // Show the popup
   document.getElementById('volunteerPopup').style.display = 'block';
@@ -134,49 +143,15 @@ function closeVolunteerForm() {
   document.getElementById('connectionStatus').style.display = 'none';
 }
 
-function showStatus(message, isSuccess) {
-  const status = document.getElementById('connectionStatus');
-  status.textContent = message;
-  status.style.display = 'block';
-  status.style.backgroundColor = isSuccess ? '#d4edda' : '#f8d7da';
-  status.style.color = isSuccess ? '#155724' : '#721c24';
-  status.style.border = isSuccess ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
-}
-
-// Handle form submission
-document.getElementById('volunteerForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  
+// Formspree handles everything automatically now!
+// Just show success message after form submission
+document.getElementById('volunteerForm').addEventListener('submit', function(e) {
   const submitBtn = this.querySelector('button[type="submit"]');
-  const originalText = submitBtn.textContent;
-  
-  submitBtn.textContent = 'Connecting...';
+  submitBtn.textContent = 'Sending...';
   submitBtn.disabled = true;
   
-  // Create FormData with all form fields
-  const formData = new FormData(this);
-  
-  try {
-    const response = await fetch('/', {
-      method: 'POST',
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(formData).toString()
-    });
-    
-    if (response.ok) {
-      showStatus('Connection sent! Both parties will receive contact details via email.', true);
-      setTimeout(() => {
-        closeVolunteerForm();
-      }, 3000);
-    } else {
-      showStatus('Error sending connection. Please try again.', false);
-    }
-  } catch (error) {
-    showStatus('Network error. Please try again.', false);
-  }
-  
-  submitBtn.textContent = originalText;
-  submitBtn.disabled = false;
+  // Form will submit normally to Formspree
+  // User will be redirected to Formspree success page
 });
 
 // Close popup when clicking outside
