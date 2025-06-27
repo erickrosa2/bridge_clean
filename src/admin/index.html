@@ -10,16 +10,27 @@
   <!-- Include the script that builds the page and powers Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
-  <script>
-    if (window.netlifyIdentity) {
-      window.netlifyIdentity.on("init", user => {
-        if (!user) {
-          window.netlifyIdentity.on("login", () => {
-            document.location.href = "/admin/";
-          });
-        }
+<script>
+if (window.netlifyIdentity) {
+  window.netlifyIdentity.on("init", user => {
+    if (!user) {
+      window.netlifyIdentity.on("login", () => {
+        document.location.href = "/admin/";
       });
     }
-  </script>
+  });
+  
+  // Show signup option for new users
+  window.netlifyIdentity.on("open", () => {
+    const iframe = document.querySelector('#netlify-identity-widget iframe');
+    if (iframe) {
+      iframe.onload = () => {
+        const signupTab = iframe.contentDocument?.querySelector('[data-tabs] [data-tab="signup"]');
+        if (signupTab) signupTab.click();
+      };
+    }
+  });
+}
+</script>
 </body>
 </html>
