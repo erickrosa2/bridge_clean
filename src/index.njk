@@ -51,7 +51,7 @@ title: bridge - creative mentorship
   </div>
   {% endif %}
   
-  <button class="volunteer-btn" onclick="openVolunteerForm(this, '{{ request.data.slug }}', '{{ request.data.email }}')">
+  <button class="volunteer-btn" onclick="openVolunteerForm(this, '{{ request.data.name }}', '{{ request.data.email }}')">
     volunteer to help
   </button>
 </div>
@@ -67,7 +67,8 @@ title: bridge - creative mentorship
 <div id="volunteerPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
   <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; max-width:400px; width:90%;">
     <h3>Volunteer to Help</h3>
-    <form id="volunteerForm">
+    <div id="connectionStatus" style="display:none; padding:10px; margin-bottom:15px; border-radius:4px;"></div>
+    <form id="volunteerForm" netlify name="volunteer-connection">
       <div style="margin-bottom:15px;">
         <label>Your name:</label><br>
         <input type="text" name="volunteer_name" required style="width:100%; padding:8px; margin-top:5px;">
@@ -77,49 +78,51 @@ title: bridge - creative mentorship
         <input type="email" name="volunteer_email" required style="width:100%; padding:8px; margin-top:5px;">
       </div>
       <div style="margin-bottom:15px;">
+        <label>Your expertise/specialty:</label><br>
+        <input type="text" name="volunteer_expertise" required style="width:100%; padding:8px; margin-top:5px;" placeholder="e.g. UX Design, Copywriting, Creative Direction">
+      </div>
+      <div style="margin-bottom:15px;">
         <label>Quick note (optional):</label><br>
         <textarea name="volunteer_note" style="width:100%; padding:8px; margin-top:5px; height:60px;" placeholder="Brief intro or how you can help..."></textarea>
       </div>
+      
+      <!-- Hidden fields for request data -->
+      <input type="hidden" name="request_need" value="">
+      <input type="hidden" name="request_role" value="">
+      <input type="hidden" name="request_location" value="">
+      <input type="hidden" name="mentee_name" value="">
+      <input type="hidden" name="mentee_email" value="">
+      
       <button type="submit" style="background:#333; color:white; padding:10px 20px; border:none; border-radius:4px; margin-right:10px;">Send Connection</button>
       <button type="button" onclick="closeVolunteerForm()" style="background:#ccc; color:#333; padding:10px 20px; border:none; border-radius:4px;">Cancel</button>
     </form>
     
     <div class="privacy-notice" style="margin-top:20px; font-size:12px; color:#666;">
-      private temporary emails created for 7 days. your real email stays hidden. after 7 days, connection expires automatically. this is just to connect and ensure 100% privacy of personal email. for files, use external sharing services [eg.: google drive, dropbox, we transfer].
+      connection sent via email. both parties get each other's contact info to connect directly. no temporary emails needed - just direct professional networking.
     </div>
   </div>
 </div>
 
-<!-- Hidden form for Netlify Forms processing -->
-<form name="volunteer-connection" netlify netlify-honeypot="bot-field" hidden>
-  <input type="text" name="volunteer_name" />
-  <input type="email" name="volunteer_email" />
-  <input type="text" name="volunteer_note" />
-  <input type="text" name="request_slug" />
-  <input type="text" name="request_need" />
-  <input type="text" name="request_role" />
-  <input type="text" name="request_location" />
-  <input type="text" name="mentee_email" />
-</form>
-
 <footer>
-  creatives helping creatives. post requests for help. volunteer when you can. private 7-day email bridges for focused help.<br>
+  creatives helping creatives. post requests for help. volunteer when you can. direct email connections for focused help.<br>
   built on netlify + eleventy
 </footer>
 
 <script>
-let currentRequestData = {};
-
-function openVolunteerForm(buttonElement, requestSlug, menteeEmail) {
-  // Store current request data
+function openVolunteerForm(buttonElement, menteeName, menteeEmail) {
+  // Get request data from the DOM
   const requestDiv = buttonElement.closest('.request');
-  currentRequestData = {
-    slug: requestSlug,
-    menteeEmail: menteeEmail,
-    need: requestDiv.querySelector('.row:nth-child(1)').textContent.replace('please:', '').trim(),
-    role: requestDiv.querySelector('.row:nth-child(2)').textContent.replace('role:', '').trim(),
-    location: requestDiv.querySelector('.row:nth-child(4)').textContent.replace('location:', '').trim()
-  };
+  const need = requestDiv.querySelector('.row:nth-child(1)').textContent.replace('please:', '').trim();
+  const role = requestDiv.querySelector('.row:nth-child(2)').textContent.replace('role:', '').trim();
+  const location = requestDiv.querySelector('.row:nth-child(4)').textContent.replace('location:', '').trim();
+  
+  // Fill hidden fields
+  const form = document.getElementById('volunteerForm');
+  form.querySelector('input[name="request_need"]').value = need;
+  form.querySelector('input[name="request_role"]').value = role;
+  form.querySelector('input[name="request_location"]').value = location;
+  form.querySelector('input[name="mentee_name"]').value = menteeName;
+  form.querySelector('input[name="mentee_email"]').value = menteeEmail;
   
   // Show the popup
   document.getElementById('volunteerPopup').style.display = 'block';
@@ -127,47 +130,49 @@ function openVolunteerForm(buttonElement, requestSlug, menteeEmail) {
 
 function closeVolunteerForm() {
   document.getElementById('volunteerPopup').style.display = 'none';
-  currentRequestData = {};
+  document.getElementById('volunteerForm').reset();
+  document.getElementById('connectionStatus').style.display = 'none';
+}
+
+function showStatus(message, isSuccess) {
+  const status = document.getElementById('connectionStatus');
+  status.textContent = message;
+  status.style.display = 'block';
+  status.style.backgroundColor = isSuccess ? '#d4edda' : '#f8d7da';
+  status.style.color = isSuccess ? '#155724' : '#721c24';
+  status.style.border = isSuccess ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
 }
 
 // Handle form submission
 document.getElementById('volunteerForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   
-  const formData = new FormData(this);
   const submitBtn = this.querySelector('button[type="submit"]');
   const originalText = submitBtn.textContent;
   
   submitBtn.textContent = 'Connecting...';
   submitBtn.disabled = true;
   
-  // Prepare data for Netlify Forms
-  const data = new FormData();
-  data.append('form-name', 'volunteer-connection');
-  data.append('volunteer_name', formData.get('volunteer_name'));
-  data.append('volunteer_email', formData.get('volunteer_email'));
-  data.append('volunteer_note', formData.get('volunteer_note') || '');
-  data.append('request_slug', currentRequestData.slug);
-  data.append('request_need', currentRequestData.need);
-  data.append('request_role', currentRequestData.role);
-  data.append('request_location', currentRequestData.location);
-  data.append('mentee_email', currentRequestData.menteeEmail);
+  // Create FormData with all form fields
+  const formData = new FormData(this);
   
   try {
     const response = await fetch('/', {
       method: 'POST',
-      body: data
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(formData).toString()
     });
     
     if (response.ok) {
-      alert('Connection sent! You should both receive emails with temporary addresses to connect privately.');
-      closeVolunteerForm();
-      this.reset();
+      showStatus('Connection sent! Both parties will receive contact details via email.', true);
+      setTimeout(() => {
+        closeVolunteerForm();
+      }, 3000);
     } else {
-      alert('Error sending connection. Please try again.');
+      showStatus('Error sending connection. Please try again.', false);
     }
   } catch (error) {
-    alert('Network error. Please try again.');
+    showStatus('Network error. Please try again.', false);
   }
   
   submitBtn.textContent = originalText;
