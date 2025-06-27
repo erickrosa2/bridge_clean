@@ -3,19 +3,15 @@ layout: base.njk
 title: bridge - creative mentorship
 ---
 
-<div class="admin-link">
-  <a href="/admin/">admin</a>
-</div>
-
 <h1>bridge</h1>
-<p>get help from experienced creatives. give help when you can. anyone can become a mentor - just add yourself.</p>
+<p>get help from experienced creatives. anyone can help for a week when they see a request that matches their skills.</p>
+
 <p>
-  <a href="/admin/#/collections/requests/new" style="margin-right: 20px; text-decoration: underline;">📝 Post Help Request</a>
-  <a href="/admin/#/collections/mentors/new" style="text-decoration: underline;">🙋‍♂️ Become a Mentor</a>
+  <button onclick="openRequestForm()" style="padding: 12px 20px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">📝 Post Bridge Request</button>
 </p>
 
 <div class="metrics">
-  {% for metric in collections.liveMetrics %}{{ metric.mentorCount }} mentors available - {{ metric.bridgeCount }} bridges crossed{% endfor %}
+  {% for metric in collections.liveMetrics %}{{ metric.bridgeCount }} bridges made so far{% endfor %}
 </div>
 
 <h2>open requests</h2>
@@ -54,8 +50,8 @@ title: bridge - creative mentorship
   </div>
   {% endif %}
   
-  <button class="volunteer-btn" onclick="openVolunteerForm(this, '{{ request.data.name }}', '{{ request.data.email }}')">
-    volunteer to help
+  <button class="volunteer-btn" onclick="openMentorForm(this, '{{ request.data.name }}', '{{ request.data.email }}')">
+    become a mentor for a week
   </button>
 </div>
 {% endfor %}
@@ -66,29 +62,81 @@ title: bridge - creative mentorship
 </div>
 {% endif %}
 
-<!-- Simple volunteer popup -->
-<div id="volunteerPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
-  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; max-width:400px; width:90%;">
-    <h3>Volunteer to Help</h3>
-    <div id="connectionStatus" style="display:none; padding:10px; margin-bottom:15px; border-radius:4px;"></div>
-    
-    <!-- Formspree Form -->
-    <form id="volunteerForm" action="https://formspree.io/f/xblyqlay" method="POST">
+<!-- Bridge Request Form Popup -->
+<div id="requestPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
+  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto;">
+    <h3>Post Bridge Request</h3>
+    <form action="https://formspree.io/f/xblyqlay" method="POST">
+      <input type="hidden" name="_subject" value="New Bridge Request">
+      <input type="hidden" name="form_type" value="bridge_request">
+      
       <div style="margin-bottom:15px;">
         <label>Your name:</label><br>
-        <input type="text" name="volunteer_name" required style="width:100%; padding:8px; margin-top:5px;">
+        <input type="text" name="name" required style="width:100%; padding:8px; margin-top:5px;">
       </div>
       <div style="margin-bottom:15px;">
         <label>Your email:</label><br>
-        <input type="email" name="volunteer_email" required style="width:100%; padding:8px; margin-top:5px;">
+        <input type="email" name="email" required style="width:100%; padding:8px; margin-top:5px;">
       </div>
       <div style="margin-bottom:15px;">
-        <label>Your expertise/specialty:</label><br>
-        <input type="text" name="volunteer_expertise" required style="width:100%; padding:8px; margin-top:5px;" placeholder="e.g. UX Design, Copywriting, Creative Direction">
+        <label>What do you need help with?</label><br>
+        <input type="text" name="need" required style="width:100%; padding:8px; margin-top:5px;" placeholder="e.g. portfolio review, career advice, design feedback">
       </div>
       <div style="margin-bottom:15px;">
-        <label>Quick note (optional):</label><br>
-        <textarea name="volunteer_note" style="width:100%; padding:8px; margin-top:5px; height:60px;" placeholder="Brief intro or how you can help..."></textarea>
+        <label>Your role/title:</label><br>
+        <input type="text" name="role" required style="width:100%; padding:8px; margin-top:5px;" placeholder="e.g. Junior Designer, Copywriter">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>Your location:</label><br>
+        <input type="text" name="location" required style="width:100%; padding:8px; margin-top:5px;" placeholder="e.g. Tokyo, Remote, USA">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>Looking for (specific expertise):</label><br>
+        <input type="text" name="looking_for" style="width:100%; padding:8px; margin-top:5px;" placeholder="e.g. Senior UX Designer, Creative Director">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>Request expires in:</label><br>
+        <select name="expires_in" required style="width:100%; padding:8px; margin-top:5px;">
+          <option value="3">3 days</option>
+          <option value="7" selected>7 days</option>
+          <option value="14">14 days</option>
+          <option value="30">30 days</option>
+        </select>
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>Detailed description:</label><br>
+        <textarea name="description" required style="width:100%; padding:8px; margin-top:5px; height:100px;" placeholder="Describe what you need help with in detail..."></textarea>
+      </div>
+      
+      <button type="submit" style="background:#333; color:white; padding:10px 20px; border:none; border-radius:4px; margin-right:10px;">Post Request</button>
+      <button type="button" onclick="closeRequestForm()" style="background:#ccc; color:#333; padding:10px 20px; border:none; border-radius:4px;">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<!-- Become Mentor Form Popup -->
+<div id="mentorPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
+  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; max-width:400px; width:90%;">
+    <h3>Become a Mentor for a Week</h3>
+    <form action="https://formspree.io/f/xblyqlay" method="POST">
+      <input type="hidden" name="_subject" value="New Weekly Mentor Connection">
+      <input type="hidden" name="form_type" value="weekly_mentor">
+      
+      <div style="margin-bottom:15px;">
+        <label>Your name:</label><br>
+        <input type="text" name="mentor_name" required style="width:100%; padding:8px; margin-top:5px;">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>Your email:</label><br>
+        <input type="email" name="mentor_email" required style="width:100%; padding:8px; margin-top:5px;">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>Your expertise:</label><br>
+        <input type="text" name="mentor_expertise" required style="width:100%; padding:8px; margin-top:5px;" placeholder="e.g. UX Design, Creative Direction">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>How you can help:</label><br>
+        <textarea name="mentor_help" required style="width:100%; padding:8px; margin-top:5px; height:80px;" placeholder="Brief note on how you can help with this specific request..."></textarea>
       </div>
       
       <!-- Hidden fields for request data -->
@@ -98,69 +146,65 @@ title: bridge - creative mentorship
       <input type="hidden" name="mentee_name" value="">
       <input type="hidden" name="mentee_email" value="">
       
-      <!-- Email subject for better organization -->
-      <input type="hidden" name="_subject" value="New volunteer connection from Bridge">
-      
-      <!-- Send copy to the mentee as well -->
-      <input type="hidden" name="_cc" value="">
-      
-      <button type="submit" style="background:#333; color:white; padding:10px 20px; border:none; border-radius:4px; margin-right:10px;">Send Connection</button>
-      <button type="button" onclick="closeVolunteerForm()" style="background:#ccc; color:#333; padding:10px 20px; border:none; border-radius:4px;">Cancel</button>
+      <button type="submit" style="background:#333; color:white; padding:10px 20px; border:none; border-radius:4px; margin-right:10px;">Connect for a Week</button>
+      <button type="button" onclick="closeMentorForm()" style="background:#ccc; color:#333; padding:10px 20px; border:none; border-radius:4px;">Cancel</button>
     </form>
     
     <div class="privacy-notice" style="margin-top:20px; font-size:12px; color:#666;">
-      connection sent via email. both parties get each other's contact info to connect directly.
+      you'll both get each other's contact info via email. mentor relationship lasts one week - perfect for focused help.
     </div>
   </div>
 </div>
 
 <footer>
-  creatives helping creatives. post requests for help. volunteer when you can. direct email connections for focused help.<br>
+  creatives helping creatives. post requests for help. become a temporary mentor when you can. one week connections for focused help.<br>
   built on netlify + eleventy
 </footer>
 
 <script>
-function openVolunteerForm(buttonElement, menteeName, menteeEmail) {
-  // Get request data from the DOM
+// Bridge Request Form
+function openRequestForm() {
+  document.getElementById('requestPopup').style.display = 'block';
+}
+
+function closeRequestForm() {
+  document.getElementById('requestPopup').style.display = 'none';
+}
+
+// Mentor Form
+function openMentorForm(buttonElement, menteeName, menteeEmail) {
   const requestDiv = buttonElement.closest('.request');
   const need = requestDiv.querySelector('.row:nth-child(1)').textContent.replace('please:', '').trim();
   const role = requestDiv.querySelector('.row:nth-child(2)').textContent.replace('role:', '').trim();
   const location = requestDiv.querySelector('.row:nth-child(4)').textContent.replace('location:', '').trim();
   
-  // Fill hidden fields
-  const form = document.getElementById('volunteerForm');
+  const form = document.getElementById('mentorPopup').querySelector('form');
   form.querySelector('input[name="request_need"]').value = need;
   form.querySelector('input[name="request_role"]').value = role;
   form.querySelector('input[name="request_location"]').value = location;
   form.querySelector('input[name="mentee_name"]').value = menteeName;
   form.querySelector('input[name="mentee_email"]').value = menteeEmail;
-  form.querySelector('input[name="_cc"]').value = menteeEmail; // CC the mentee
   
-  // Show the popup
-  document.getElementById('volunteerPopup').style.display = 'block';
+  document.getElementById('mentorPopup').style.display = 'block';
 }
 
-function closeVolunteerForm() {
-  document.getElementById('volunteerPopup').style.display = 'none';
-  document.getElementById('volunteerForm').reset();
-  document.getElementById('connectionStatus').style.display = 'none';
+function closeMentorForm() {
+  document.getElementById('mentorPopup').style.display = 'none';
 }
 
-// Formspree handles everything automatically now!
-// Just show success message after form submission
-document.getElementById('volunteerForm').addEventListener('submit', function(e) {
-  const submitBtn = this.querySelector('button[type="submit"]');
-  submitBtn.textContent = 'Sending...';
-  submitBtn.disabled = true;
-  
-  // Form will submit normally to Formspree
-  // User will be redirected to Formspree success page
+// Close popups when clicking outside
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'requestPopup') closeRequestForm();
+  if (e.target.id === 'mentorPopup') closeMentorForm();
 });
 
-// Close popup when clicking outside
-document.getElementById('volunteerPopup').addEventListener('click', function(e) {
-  if (e.target === this) {
-    closeVolunteerForm();
-  }
+// Show loading state on form submission
+document.querySelectorAll('form').forEach(form => {
+  form.addEventListener('submit', function() {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Connecting...';
+    submitBtn.disabled = true;
+  });
 });
 </script>
